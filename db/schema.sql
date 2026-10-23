@@ -19,3 +19,10 @@ CREATE TABLE wallet_transactions (
   balance_after  NUMERIC(14,2) NOT NULL,
   created_at     TIMESTAMPTZ   NOT NULL DEFAULT now()
 );
+
+-- Idempotency: each txId applied at most once
+CREATE UNIQUE INDEX idx_wallet_transactions_tx_id ON wallet_transactions(tx_id);
+
+-- Rollback safety: a debit can be refunded at most once
+CREATE UNIQUE INDEX idx_wallet_transactions_ref_tx_id ON wallet_transactions(ref_tx_id) WHERE ref_tx_id IS NOT NULL;
+
